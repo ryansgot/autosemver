@@ -1,0 +1,10 @@
+# build
+**/build/*
+
+# intellij
+**/.idea/*
+**/*.iml
+
+# gradle
+local.properties
+.gradle/*

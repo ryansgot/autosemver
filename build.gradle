@@ -1,0 +1,34 @@
+buildscript {
+    repositories {
+        mavenCentral()
+        jcenter()
+    }
+    dependencies {
+        classpath 'com.saantiaguilera.gradle.publish.helper:core:3.0.0'
+    }
+}
+
+apply plugin: 'com.saantiaguilera.gradle.publish.helper'
+
+ext {
+    groupId = 'com.fsryan.gradle'
+    versionName = '0.0.1'
+    artifactId = 'autosemver'
+}
+
+publishGlobalConfigurations {
+    groupId = "$groupId"
+    versionName = "$versionName"
+
+    artifactsMappings = ['autosemver' : "$artifactId"]
+
+    bintrayRepository = 'maven'
+
+    githubUrl = "https://github.com/saantiaguilera/android-api-SecureKeys"
+
+    bintrayUser = project.hasProperty('bintrayUser') ? project.getProperty('bintrayUser') : ''
+    bintrayApiKey = project.hasProperty('bintrayApiKey') ? project.getProperty('bintrayApiKey') : ''
+
+    licenseUrl = "http://www.opensource.org/licenses/MIT"
+    licenseName = "The MIT License"
+}
