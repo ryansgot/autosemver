@@ -1,7 +1,7 @@
-package main.groovy.com.fsryan.gradle.autosemver
+package com.fsryan.gradle.autosemver
 
-import org.gradle.api.Plugin
 import org.gradle.api.Project
+import org.gradle.api.Plugin
 
 class AutoSemVerPlugin implements Plugin<Project> {
 
@@ -9,3 +9,4 @@ class AutoSemVerPlugin implements Plugin<Project> {
 
     }
 }
+
