@@ -2,7 +2,9 @@ package com.fsryan.gradle.autosemver
 
 import java.util.regex.Pattern
 
-class VersionSummary {
+import static com.fsryan.gradle.autosemver.CharCounter.countOf
+
+class VersionSummary implements Comparable<VersionSummary> {
 
     private static final Pattern validVersionRegex = Pattern.compile("^((\\d+)\\.(\\d+)\\.(\\d+))" // version string
             + "(?:-([\\dA-Za-z\\-]+(?:\\.[\\dA-Za-z\\-]+)*))?" // prerelease suffix (optional)
@@ -16,10 +18,11 @@ class VersionSummary {
     final String metaData
 
     VersionSummary(String value) {
-        final String v = value
-        if (!validVersionRegex.matcher(value).matches()) {
+        if (!validVersionRegex.matcher(value).matches() || countOf('-').inString(value) > 1 || countOf('+').inString(value) > 1) {
             throw new InvalidVersionException(value)
         }
+
+        final String v = value
 
         // major version
         int dotIdx = v.indexOf('.')
@@ -70,10 +73,81 @@ class VersionSummary {
     boolean hasMetaData() {
         return metaData != null
     }
+
+    @Override
+    int compareTo(VersionSummary other) {
+        if (other == null) {
+            throw new IllegalArgumentException("Cannot compare with null")
+        }
+        if (major != other.major) {
+            return major - other.major
+        }
+        if (minor != other.minor) {
+            return minor - other.minor
+        }
+        if (patch != other.patch) {
+            return patch - other.patch
+        }
+        if (isPreRelease() ^ other.isPreRelease()) {
+            return isPreRelease() ? -1 : 1
+        }
+        if (!isPreRelease()) {
+            return 0
+        }
+
+        // matching major.minor.patch versions and both are prereleases
+        // numerically/lexically compare by prerelease divsion
+        // finally, compare by number of divisions
+        String[] splitPreRelease = preRelease.split("\\.")
+        String[] otherSplitPreRelease = other.preRelease.split("\\.")
+        final int minLength = Math.min(splitPreRelease.length, otherSplitPreRelease.length)
+        for (int i = 0; i < minLength; i++) {
+            try {
+                int val = Integer.parseInt(splitPreRelease[i])
+                int otherVal = Integer.parseInt(otherSplitPreRelease[i])
+                if (val != otherVal) {
+                    return val - otherVal
+                }
+            } catch (NumberFormatException nfe) {
+                int stringComparison = splitPreRelease[i].compareTo(otherSplitPreRelease[i])
+                if (stringComparison != 0) {
+                    return stringComparison
+                }
+            }
+        }
+        return splitPreRelease.length - otherSplitPreRelease.length
+    }
+
+    private int comparePreRelease(String otherPreRelease) {
+    }
 }
 
 class InvalidVersionException extends RuntimeException {
     InvalidVersionException(String value) {
         super("$value is an invalid semantic version string")
+    }
+}
+
+class CharCounter {
+
+    private final char c
+
+    CharCounter(char c) {
+        this.c = c
+    }
+
+    static CharCounter countOf(char c) {
+        return new CharCounter(c)
+    }
+
+    static CharCounter countOf(String c) {
+        if (c.length() != 1) {
+            throw new IllegalArgumentException("can only find count of single characters")
+        }
+        return countOf(c.charAt(0))
+    }
+
+    int inString(String str) {
+        return str.replaceAll("[^" + c + "]", "").length()
     }
 }

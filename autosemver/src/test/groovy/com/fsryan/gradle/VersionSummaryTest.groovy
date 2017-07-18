@@ -124,13 +124,71 @@ abstract class VersionSummaryTest {
 
         @Parameterized.Parameters
         static Collection<Object[]> data() {
-            def data = ['', '1', '0.', '.0.0', 'a.0.0', '0.a.0', '0.0.a', '1.0.0-', '1.0.0-a+', '1.0.0+md-prerelease', '1.0.0-alpha,', '1.0.0-alpha+,']
+            def data = [
+                    '',
+                    '1',
+                    '0.',
+                    '.0.0',
+                    'a.0.0',
+                    '0.a.0',
+                    '0.0.a',
+                    '1.0.0-',
+                    '1.0.0-a+',
+                    '1.0.0+md-prerelease',
+                    '1.0.0-alpha,',
+                    '1.0.0-alpha+,',
+                    '1.0.0.1',
+                    '1.0.0-alpha-beta',
+                    '1.0.0+alpha+beta'
+            ]
             return data.collect { [it] as Object[] }
         }
 
         @Test(expected = InvalidVersionException.class)
         void shouldThrowOnInvalidInput() {
             new VersionSummary(input)
+        }
+    }
+
+    @RunWith(Parameterized.class)
+    static class Comparison {
+
+        private final VersionSummary vs1
+        private final VersionSummary vs2
+        private final int expectedComparison
+
+        Comparison(String v1, String v2, int expectedComparison) {
+            vs1 = new VersionSummary(v1)
+            vs2 = new VersionSummary(v2)
+            this.expectedComparison = expectedComparison
+        }
+
+        @Parameterized.Parameters
+        static Collection<Object[]> data() {
+            Object[][] data = new Object[12][3]
+            data[0] = ["1.2.3", "1.2.3", 0]                     // equal versions with no pre release should compare to 0
+            data[1] = ["1.2.3", "1.2.3+some.meta.data", 0]      // meta data should have no effect on comparison
+            data[2] = ["1.2.3-alpha", "1.2.3-alpha", 0]         // major.minor.patch-preRelease all equal should be equal
+            data[3] = ["1.2.3", "1.2.3-alpha", 1]               // equal major.minor.patch where one has pre release should have non-pre-release precede
+            data[4] = ["1.2.3-beta", "1.2.3-alpha", 1]          // equal major.minor.patch with unequal alpha pre release should be calculated lexically
+            data[5] = ["1.2.3-1", "1.2.3-2", -1]                // equal major.minor.patch with unequal numeric pre release should be calculated numerically
+            data[6] = ["1.2.3-rc.beta", "1.2.3-rc.alpha", 1]    // equal major.minor.patch with unequal alpha pre release should be calculated lexically (multiple divisions)
+            data[7] = ["1.2.3-1.1", "1.2.3-1.2", -1]            // equal major.minor.patch with unequal numeric pre release should be calculated numerically (multiple divisions)
+            data[8] = ["1.2.3-1.1.1", "1.2.3-1.1", 1]           // equal major.minor.patch with unequal length pre release should give precedence to longer
+            data[9] = ["1.2.3", "1.2.4", -1]                    // larger patch version should get precedence
+            data[10] = ["1.2.0", "1.3.0", -1]                   // larger minor version should get precedence
+            data[11] = ["1.0.0", "2.0.0", -1]                   // larger major version should get precedence
+            return data
+        }
+
+        @Test
+        void shouldCalculateCompareToValueCorrectly() {
+            assertEquals(expectedComparison, vs1 <=> vs2)
+        }
+
+        @Test
+        void shouldCalculateReverseCompareToValueCorrectly() {
+            assertEquals(expectedComparison * -1, vs2 <=> vs1)
         }
     }
 }
