@@ -1,7 +1,5 @@
-package com.fsryan.gradle
+package com.fsryan.gradle.autosemver
 
-import com.fsryan.gradle.autosemver.InvalidVersionException
-import com.fsryan.gradle.autosemver.VersionSummary
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith

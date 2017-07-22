@@ -2,7 +2,7 @@ package com.fsryan.gradle.autosemver
 
 import java.util.regex.Pattern
 
-import static com.fsryan.gradle.autosemver.CharCounter.countOf
+import static com.fsryan.gradle.autosemver.VersionSummary.CharCounter.countOf
 
 class VersionSummary implements Comparable<VersionSummary> {
 
@@ -11,14 +11,14 @@ class VersionSummary implements Comparable<VersionSummary> {
             + "(?:\\+([\\dA-Za-z\\-]+(?:\\.[\\dA-Za-z\\-]+)*))?" // build suffix (optional)
             + '$')
 
-    final int major = 0
-    final int minor = 0
-    final int patch = 0
-    final String preRelease
-    final String metaData
+    int major = 0
+    int minor = 0
+    int patch = 0
+    String preRelease
+    String metaData
 
     VersionSummary(String value) {
-        if (!validVersionRegex.matcher(value).matches() || countOf('-').inString(value) > 1 || countOf('+').inString(value) > 1) {
+        if (!validVersionRegex.matcher(value).matches() || countOf('-' as char).inString(value) > 1 || countOf('+' as char).inString(value) > 1) {
             throw new InvalidVersionException(value)
         }
 
@@ -118,36 +118,32 @@ class VersionSummary implements Comparable<VersionSummary> {
         return splitPreRelease.length - otherSplitPreRelease.length
     }
 
-    private int comparePreRelease(String otherPreRelease) {
+    /**
+     * <p>
+     *   Utility class for counting occurrences of a character in a a string.
+     *   Will not work for characters that must be escaped in regex
+     * </p>
+     */
+    private static class CharCounter {
+
+        private final char c
+
+        CharCounter(char c) {
+            this.c = c
+        }
+
+        static CharCounter countOf(char c) {
+            return new CharCounter(c)
+        }
+
+        int inString(String str) {
+            return str.replaceAll("[^" + c + "]", "").length()
+        }
     }
 }
 
 class InvalidVersionException extends RuntimeException {
     InvalidVersionException(String value) {
         super("$value is an invalid semantic version string")
-    }
-}
-
-class CharCounter {
-
-    private final char c
-
-    CharCounter(char c) {
-        this.c = c
-    }
-
-    static CharCounter countOf(char c) {
-        return new CharCounter(c)
-    }
-
-    static CharCounter countOf(String c) {
-        if (c.length() != 1) {
-            throw new IllegalArgumentException("can only find count of single characters")
-        }
-        return countOf(c.charAt(0))
-    }
-
-    int inString(String str) {
-        return str.replaceAll("[^" + c + "]", "").length()
     }
 }
