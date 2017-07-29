@@ -21,8 +21,11 @@ class ProjectHelper {
         if (isAndroidProject(project)) {
             def androidExt = project.extensions.findByName('android')
             def defaultConfig = androidExt.properties.get('defaultConfig')
+
+            // These are mainly for verification purposes
             println "Setting android defaultConfig versionName to: ${project.version}"
             println "Setting android defaultConfig versionCode to: ${versionSummary.toVersionCode()}"
+
             defaultConfig.versionName = project.version
             defaultConfig.versionCode = versionSummary.toVersionCode()
         }

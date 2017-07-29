@@ -5,17 +5,17 @@ import org.gradle.api.tasks.TaskAction
 
 import static com.fsryan.gradle.autosemver.ProjectHelper.updateProjectVersion
 
-class VersionBumpTask extends DefaultTask {
+class LocalVersionBumpTask extends DefaultTask {
 
-    public static final String NAME = "bumpVersion"
+    public static final String NAME = "bumpVersionLocally"
 
     String branchName
     File versionFile
     SourceControlApi sourceControlApi
     BranchConfig branchConfig
 
-    VersionBumpTask() {
-        description = "Bump the version"
+    LocalVersionBumpTask() {
+        description = "Bump the version on the local machine"
         group = "Continuous Integration"
     }
 

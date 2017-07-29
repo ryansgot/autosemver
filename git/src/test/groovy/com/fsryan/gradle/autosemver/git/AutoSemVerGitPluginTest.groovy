@@ -33,7 +33,7 @@ class AutoSemVerGitPluginTest extends Specification {
         pluginClasspath = pluginClasspathResource.readLines().collect { new File(it) }
     }
 
-    def "pushVersionBumpCommits dependent upon bumpVersion"() {
+    def "bumpVersion dependent upon bumpVersionLocally"() {
         given:
         versionLockFile << '1.4.5-preRelease+metaData'
         buildFile << PLUGIN_PART
@@ -41,14 +41,14 @@ class AutoSemVerGitPluginTest extends Specification {
         when:
         def result = GradleRunner.create()
                 .withProjectDir(testProjectDir.root)
-                .withArguments('pushVersionBumpCommits')
+                .withArguments('bumpVersion')
                 .withPluginClasspath(pluginClasspath)
                 .build()
 
         then:
         result.output.contains('bumpVersion will do nothing')
-        result.output.contains('pushVersionBumpCommits will do nothing')
+        result.output.contains('bumpVersionLocally will do nothing')
         result.task(":bumpVersion").outcome == SUCCESS
-        result.task(":pushVersionBumpCommits").outcome == SUCCESS
+        result.task(":bumpVersionLocally").outcome == SUCCESS
     }
 }

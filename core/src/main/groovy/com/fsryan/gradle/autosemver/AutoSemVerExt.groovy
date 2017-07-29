@@ -13,6 +13,7 @@ class AutoSemVerExt {
      * </p>
      */
     String versionFilename = 'version.lock'
+
     private NamedDomainObjectContainer<BranchConfig> branchConfigs
 
     AutoSemVerExt(NamedDomainObjectContainer<BranchConfig> branchConfigs) {
@@ -22,8 +23,6 @@ class AutoSemVerExt {
             bc.taskDependencies = bc.taskDependencies ?: Collections.emptyList()
             bc.pullRemote = bc.pullRemote ?: 'origin'
             bc.pushRemote = bc.pushRemote ?: 'origin'
-
-            println "branchConfig: $bc"
         }
     }
 

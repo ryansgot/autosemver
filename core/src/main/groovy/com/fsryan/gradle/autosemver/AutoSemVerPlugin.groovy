@@ -8,13 +8,14 @@ import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 
 import static com.fsryan.gradle.autosemver.ProjectHelper.hasSubprojects
-import static com.fsryan.gradle.autosemver.ProjectHelper.isAndroidProject
 import static com.fsryan.gradle.autosemver.ProjectHelper.isRootProject
 import static com.fsryan.gradle.autosemver.ProjectHelper.updateProjectVersion
 
 abstract class AutoSemVerPlugin<T extends SourceControlApi> implements Plugin<Project> {
 
     private static final Logger log = LoggerFactory.getLogger(AutoSemVerPlugin.class)
+
+    static final String VERSION_BUMP_TASK_NAME = "bumpVersion"
 
     @Override
     void apply(Project project) {
@@ -47,10 +48,10 @@ abstract class AutoSemVerPlugin<T extends SourceControlApi> implements Plugin<Pr
             return
         }
 
-        project.tasks.create('pushVersionBumpCommits', {
+        project.tasks.create(VERSION_BUMP_TASK_NAME, {
             it.description = 'Push all version bump commits to remote'
             it.group = 'Continuous Integration'
-            it.dependsOn(project.subprojects.bumpVersion)
+            it.dependsOn(project.subprojects.bumpVersionLocally)
             it.doLast { a ->
                 sourceControlApi().push(branchConfig.pushRemote, branchConfig.name)
             }
@@ -65,7 +66,7 @@ abstract class AutoSemVerPlugin<T extends SourceControlApi> implements Plugin<Pr
             return
         }
 
-        VersionBumpTask vbt = project.tasks.create(VersionBumpTask.NAME, VersionBumpTask.class)
+        LocalVersionBumpTask vbt = project.tasks.create(LocalVersionBumpTask.NAME, LocalVersionBumpTask.class)
         vbt.branchName = branchConfig.name
         vbt.sourceControlApi = sourceControlApi()
         vbt.versionFile = ext.getVersionFile(project)
@@ -73,10 +74,10 @@ abstract class AutoSemVerPlugin<T extends SourceControlApi> implements Plugin<Pr
         vbt.dependsOn(branchConfig.taskDependencies ?: [])
 
         if (isRootProject(project)) {
-            project.tasks.create('pushVersionBumpCommits', {
+            project.tasks.create(VERSION_BUMP_TASK_NAME, {
                 it.description = 'Push all version bump commits to remote'
                 it.group = 'Continuous Integration'
-                it.dependsOn('bumpVersion')
+                it.dependsOn(LocalVersionBumpTask.NAME)
                 it.doLast { a ->
                     sourceControlApi().push(branchConfig.pushRemote, branchConfig.name)
                 }
@@ -121,32 +122,32 @@ abstract class AutoSemVerPlugin<T extends SourceControlApi> implements Plugin<Pr
 
     static void createNoOpTasks(Project project, String currentBranch) {
         if (dependOnSubprojects(project)) {
-            project.tasks.create('pushVersionBumpCommits', {
+            project.tasks.create(VERSION_BUMP_TASK_NAME, {
                 it.description = "Does nothing because there is no configuration for branch: $currentBranch"
                 it.group = "Continuous Integration"
-                it.dependsOn(project.subprojects.bumpVersion)
+                it.dependsOn(project.subprojects.bumpVersionLocally)
                 it.doLast { a ->
-                    println "No configuration for current branch: $currentBranch; pushVersionBumpCommits will do nothing"
+                    println "No configuration for current branch: $currentBranch; $VERSION_BUMP_TASK_NAME will do nothing"
                 }
             })
             return
         }
 
-        project.tasks.create('bumpVersion', {
+        project.tasks.create(LocalVersionBumpTask.NAME, {
             it.description = "Does nothing because there is no configuration for branch: $currentBranch"
             it.group = "Continuous Integration"
             it.doLast {
-                println "No configuration for current branch: $currentBranch; bumpVersion will do nothing"
+                println "No configuration for current branch: $currentBranch; ${LocalVersionBumpTask.NAME} will do nothing"
             }
         })
 
         if (isRootProject(project)) {
-            project.tasks.create('pushVersionBumpCommits', {
+            project.tasks.create(VERSION_BUMP_TASK_NAME, {
                 it.description = "Does nothing because there is no configuration for branch: $currentBranch"
                 it.group = "Continuous Integration"
-                it.dependsOn 'bumpVersion'
+                it.dependsOn(LocalVersionBumpTask.NAME)
                 it.doLast { a ->
-                    println "No configuration for current branch: $currentBranch; pushVersionBumpCommits will do nothing"
+                    println "No configuration for current branch: $currentBranch; $VERSION_BUMP_TASK_NAME will do nothing"
                 }
             })
         }
