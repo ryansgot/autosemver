@@ -37,3 +37,10 @@ jobs:
 
       # run tests!
       - run: ./gradlew clean test
+
+      - store_artifacts:
+          path: core/build/reports/*
+          destination: core/
+      - store_artifacts:
+          path: git/build/reports/*
+          destination: git/
