@@ -26,8 +26,8 @@ jobs:
           # fallback to using the latest cache if no exact match is found
           - v1-dependencies-
 
-      - run: echo y | android update sdk --no-ui --all --filter tools,extra-android-m2repository
-      - run: echo y | android update sdk --no-ui --all --filter build-tools-25.0.2,android-25
+#      - run: echo y | android update sdk --no-ui --all --filter tools,extra-android-m2repository
+#      - run: echo y | android update sdk --no-ui --all --filter build-tools-25.0.2,android-25
       - run: ./gradlew dependencies
 
       - save_cache:
