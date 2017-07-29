@@ -8,7 +8,9 @@ import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 
 import static com.fsryan.gradle.autosemver.ProjectHelper.hasSubprojects
+import static com.fsryan.gradle.autosemver.ProjectHelper.isAndroidProject
 import static com.fsryan.gradle.autosemver.ProjectHelper.isRootProject
+import static com.fsryan.gradle.autosemver.ProjectHelper.updateProjectVersion
 
 abstract class AutoSemVerPlugin<T extends SourceControlApi> implements Plugin<Project> {
 
@@ -20,54 +22,71 @@ abstract class AutoSemVerPlugin<T extends SourceControlApi> implements Plugin<Pr
         def ext = project.extensions.create(AutoSemVerExt.NAME, AutoSemVerExt, branchConfigs)
 
         project.afterEvaluate {
-
             final String currentBranch = sourceControlApi().currentBranch()
-            if (currentBranch == null || currentBranch.isEmpty()) {
-                createNoOpTasks(project, null)
-                return
-            }
-
-            BranchConfig branchConfig
+            BranchConfig branchConfig = null
             try {
                 branchConfig = ext.branchConfigOf(currentBranch)
             } catch (UnknownDomainObjectException udoe) {
-                createNoOpTasks(project, currentBranch)
-                return
+                log.warn("No branch config found for branch: $currentBranch")
             }
 
-            // the subprojects are the ones that will be versioned
-            if (isRootProject(project) && hasSubprojects(project)) {
-                project.evaluationDependsOnChildren()
-                project.tasks.create('pushVersionBumpCommits', {
-                    it.description = 'Push all version bump commits to remote'
-                    it.group = 'Continuous Integration'
-                    it.dependsOn(project.subprojects.bumpVersion)
-                    it.doLast { a ->
-                        sourceControlApi().push(branchConfig.pushRemote, currentBranch)
-                    }
-                })
-                return
-            }
-
-            VersionBumpTask vbt = project.tasks.create(VersionBumpTask.NAME, VersionBumpTask.class)
-            vbt.branchName = currentBranch
-            vbt.sourceControlApi = sourceControlApi()
-            vbt.versionFile = ext.getVersionFile(project)
-            vbt.branchConfig = overrideRootProjectValues(project, branchConfig)
-            vbt.dependsOn(branchConfig.taskDependencies ?: [])
-
-            if (isRootProject(project)) {
-                project.tasks.create('pushVersionBumpCommits', {
-                    it.dependsOn('bumpVersion')
-                    it.doLast { a ->
-                        sourceControlApi().push(branchConfig.pushRemote, currentBranch)
-                    }
-                })
+            if (dependOnSubprojects(project)) {
+                configureRootProjectWithSubprojects(project, branchConfig)
+            } else {
+                configureVersionedProject(project, ext, branchConfig)
             }
         }
     }
 
     abstract T sourceControlApi()
+
+    void configureRootProjectWithSubprojects(Project project, BranchConfig branchConfig) {
+        project.evaluationDependsOnChildren()
+        if (branchConfig == null) {
+            createNoOpTasks(project, null)
+            return
+        }
+
+        project.tasks.create('pushVersionBumpCommits', {
+            it.description = 'Push all version bump commits to remote'
+            it.group = 'Continuous Integration'
+            it.dependsOn(project.subprojects.bumpVersion)
+            it.doLast { a ->
+                sourceControlApi().push(branchConfig.pushRemote, branchConfig.name)
+            }
+        })
+    }
+
+    void configureVersionedProject(Project project, AutoSemVerExt ext, BranchConfig branchConfig) {
+        updateProjectVersion(project, new VersionSummary(ext.getVersionFile(project).text))
+
+        if (branchConfig == null) {
+            createNoOpTasks(project, null)
+            return
+        }
+
+        VersionBumpTask vbt = project.tasks.create(VersionBumpTask.NAME, VersionBumpTask.class)
+        vbt.branchName = branchConfig.name
+        vbt.sourceControlApi = sourceControlApi()
+        vbt.versionFile = ext.getVersionFile(project)
+        vbt.branchConfig = overrideRootProjectValues(project, branchConfig)
+        vbt.dependsOn(branchConfig.taskDependencies ?: [])
+
+        if (isRootProject(project)) {
+            project.tasks.create('pushVersionBumpCommits', {
+                it.description = 'Push all version bump commits to remote'
+                it.group = 'Continuous Integration'
+                it.dependsOn('bumpVersion')
+                it.doLast { a ->
+                    sourceControlApi().push(branchConfig.pushRemote, branchConfig.name)
+                }
+            })
+        }
+    }
+
+    static boolean dependOnSubprojects(Project project) {
+        return isRootProject(project) && hasSubprojects(project)
+    }
 
     static BranchConfig overrideRootProjectValues(Project project, BranchConfig branchConfig) {
         if (isRootProject(project)) {
@@ -88,8 +107,6 @@ abstract class AutoSemVerPlugin<T extends SourceControlApi> implements Plugin<Pr
             return branchConfig
         }
 
-        println "${project.name} branchConfig ${branchConfig.name} prior to filling in root: $branchConfig"
-
         BranchConfig ret = new BranchConfig(branchConfig.name)
         ret.taskDependencies = branchConfig.taskDependencies ?: rootBranchConfig.taskDependencies
         ret.pushRemote = branchConfig.pushRemote ?: rootBranchConfig.pushRemote
@@ -99,15 +116,14 @@ abstract class AutoSemVerPlugin<T extends SourceControlApi> implements Plugin<Pr
         ret.skipCiCommitMessageSuffix = branchConfig.skipCiCommitMessageSuffix ?: rootBranchConfig.skipCiCommitMessageSuffix
         ret.versionIncrement = branchConfig.versionIncrement ?: rootBranchConfig.versionIncrement
 
-        println "${project.name} branchConfig ${ret.name} after filling in root: $ret"
-
         return ret
     }
 
     static void createNoOpTasks(Project project, String currentBranch) {
-        if (isRootProject(project) && hasSubprojects(project)) {
-            project.evaluationDependsOnChildren()
+        if (dependOnSubprojects(project)) {
             project.tasks.create('pushVersionBumpCommits', {
+                it.description = "Does nothing because there is no configuration for branch: $currentBranch"
+                it.group = "Continuous Integration"
                 it.dependsOn(project.subprojects.bumpVersion)
                 it.doLast { a ->
                     println "No configuration for current branch: $currentBranch; pushVersionBumpCommits will do nothing"
@@ -117,6 +133,8 @@ abstract class AutoSemVerPlugin<T extends SourceControlApi> implements Plugin<Pr
         }
 
         project.tasks.create('bumpVersion', {
+            it.description = "Does nothing because there is no configuration for branch: $currentBranch"
+            it.group = "Continuous Integration"
             it.doLast {
                 println "No configuration for current branch: $currentBranch; bumpVersion will do nothing"
             }
@@ -124,6 +142,8 @@ abstract class AutoSemVerPlugin<T extends SourceControlApi> implements Plugin<Pr
 
         if (isRootProject(project)) {
             project.tasks.create('pushVersionBumpCommits', {
+                it.description = "Does nothing because there is no configuration for branch: $currentBranch"
+                it.group = "Continuous Integration"
                 it.dependsOn 'bumpVersion'
                 it.doLast { a ->
                     println "No configuration for current branch: $currentBranch; pushVersionBumpCommits will do nothing"

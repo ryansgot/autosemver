@@ -55,11 +55,35 @@ class VersionSummary implements Comparable<VersionSummary> {
         if (plusIdx > 0) {
             metaData = v.substring(plusIdx + 1)
         }
+
+        if (major > 999 || minor > 999 || patch > 999) {
+            throw new VersionPartTooHighException(toString())
+        }
     }
 
     @Override
     String toString() {
         return major + "." + minor + "." + patch  + (isPreRelease() ? "-" + preRelease : "") + (hasMetaData() ? "+" + metaData : "")
+    }
+
+    int toVersionCode() {
+        return 1_000_000 * major + 1_000 * minor + patch
+    }
+
+    void increment(String versionIncrement) {
+        if ("patch".equalsIgnoreCase(versionIncrement)) {
+            patch++
+        } else if ("minor".equalsIgnoreCase(versionIncrement)) {
+            minor++
+        } else if ("major".equalsIgnoreCase(versionIncrement)) {
+            major++
+        } else {
+            throw new IllegalArgumentException("Version part not found: $versionIncrement")
+        }
+
+        if (major > 999 || minor > 999 || patch > 999) {
+            throw new VersionPartTooHighException(toString())
+        }
     }
 
     boolean isStable() {
@@ -145,5 +169,11 @@ class VersionSummary implements Comparable<VersionSummary> {
 class InvalidVersionException extends RuntimeException {
     InvalidVersionException(String value) {
         super("$value is an invalid semantic version string")
+    }
+}
+
+class VersionPartTooHighException extends RuntimeException {
+    VersionPartTooHighException(String value) {
+        super("$value contains a part that is too large")
     }
 }

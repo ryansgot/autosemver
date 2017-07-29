@@ -1,5 +1,6 @@
 package com.fsryan.gradle.autosemver
 
+import junit.runner.Version
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -22,6 +23,7 @@ abstract class VersionSummaryTest {
         private final boolean expectedStable
         private final boolean expectedIsPreRelease
         private final boolean expectedHasMetaData
+        private final int expectedVersionCode
 
         private VersionSummary versionSummaryUnderTest
 
@@ -34,7 +36,8 @@ abstract class VersionSummaryTest {
                      String expectedMetaData,
                      boolean expectedStable,
                      boolean expectedIsPreRelease,
-                     boolean expectedHasMetaData) {
+                     boolean expectedHasMetaData,
+                     int expectedVersionCode) {
             this.input = input
             this.expectedVersion = expectedVersion
             this.expectedMajor = expectedMajor
@@ -45,18 +48,19 @@ abstract class VersionSummaryTest {
             this.expectedStable = expectedStable
             this.expectedIsPreRelease = expectedIsPreRelease
             this.expectedHasMetaData = expectedHasMetaData
+            this.expectedVersionCode = expectedVersionCode
         }
 
         @Parameterized.Parameters
         static Collection<Object[]> data() {
-            Object[][] data = new Object[7][10]
-            data[0] = ["0.0.0", "0.0.0", 0, 0, 0, null, null, false, false, false]                                                          // all zeros correctly parsed
-            data[1] = ["1.1.1", "1.1.1", 1, 1, 1, null, null, true, false, false]                                                           // all ones correctly parsed
-            data[2] = ["01.01.01", "1.1.1", 1, 1, 1, null, null, true, false, false]                                                        // leading zeros removed from major, minor, and patch versions
-            data[3] = ["999.999.999", "999.999.999", 999, 999, 999, null, null, true, false, false]                                         // as much as 999 for any major/minor/patch version
-            data[4] = ["1.2.3-alpha", "1.2.3-alpha", 1, 2, 3, "alpha", null, true, true, false]                                             // should correctly parse pre release version when no meta data
-            data[5] = ["1.0.0+20130313144700", "1.0.0+20130313144700", 1, 0, 0, null, "20130313144700", true, false, true]                  // should correctly parse meta data when no pre release version
-            data[6] = ["1.0.0-beta+exp.sha.5114f85", "1.0.0-beta+exp.sha.5114f85", 1, 0, 0, "beta", "exp.sha.5114f85", true, true, true]    // should correctly parse pre release version and meta data when both present
+            Object[][] data = new Object[7][11]
+            data[0] = ["0.0.0", "0.0.0", 0, 0, 0, null, null, false, false, false, 0]                                                               // all zeros correctly parsed
+            data[1] = ["1.1.1", "1.1.1", 1, 1, 1, null, null, true, false, false, 1001001]                                                          // all ones correctly parsed
+            data[2] = ["01.01.01", "1.1.1", 1, 1, 1, null, null, true, false, false, 1001001]                                                       // leading zeros removed from major, minor, and patch versions
+            data[3] = ["999.999.999", "999.999.999", 999, 999, 999, null, null, true, false, false, 999999999]                                      // as much as 999 for any major/minor/patch version
+            data[4] = ["1.2.3-alpha", "1.2.3-alpha", 1, 2, 3, "alpha", null, true, true, false, 1002003]                                            // should correctly parse pre release version when no meta data
+            data[5] = ["1.0.0+20130313144700", "1.0.0+20130313144700", 1, 0, 0, null, "20130313144700", true, false, true, 1000000]                 // should correctly parse meta data when no pre release version
+            data[6] = ["1.0.1-beta+exp.sha.5114f85", "1.0.1-beta+exp.sha.5114f85", 1, 0, 1, "beta", "exp.sha.5114f85", true, true, true, 1000001]   // should correctly parse pre release version and meta data when both present
             return data
         }
 
@@ -109,6 +113,11 @@ abstract class VersionSummaryTest {
         void shouldOutputCorrectHasMetaDataValue() {
             assertEquals(expectedHasMetaData, versionSummaryUnderTest.hasMetaData())
         }
+
+        @Test
+        void shouldOutputCorrectVersionCode() {
+            assertEquals(expectedVersionCode, versionSummaryUnderTest.toVersionCode())
+        }
     }
 
     @RunWith(Parameterized.class)
@@ -145,6 +154,39 @@ abstract class VersionSummaryTest {
         @Test(expected = InvalidVersionException.class)
         void shouldThrowOnInvalidInput() {
             new VersionSummary(input)
+        }
+    }
+
+    @RunWith(Parameterized.class)
+    static class VersionPartTooHighExceptionCases {
+
+        private final String invalidVersion
+        private final String preInvalidVersion
+        private final String part
+
+        VersionPartTooHighExceptionCases(String invalidVersion, String preInvalidVersion, String part) {
+            this.invalidVersion = invalidVersion
+            this.preInvalidVersion = preInvalidVersion
+            this.part = part
+        }
+
+        @Parameterized.Parameters
+        static Collection<Object[]> data() {
+            Object[][] data = new Object[3][2]
+            data[0] = ["1000.0.0", "999.0.0", "major"]
+            data[1] = ["1.1000.0", "1.999.0", "minor"]
+            data[2] = ["1.1.1000", "1.1.999", "patch"]
+            return data
+        }
+
+        @Test(expected = VersionPartTooHighException.class)
+        void shouldThrowWhenConstructingAndVersionPartTooHigh() {
+            new VersionSummary(invalidVersion)
+        }
+
+        @Test(expected = VersionPartTooHighException.class)
+        void shouldThrowWhenIncrementingAndPartTooHigh() {
+            new VersionSummary(preInvalidVersion).increment(part)
         }
     }
 
@@ -189,4 +231,6 @@ abstract class VersionSummaryTest {
             assertEquals(expectedComparison * -1, vs2 <=> vs1)
         }
     }
+
+
 }

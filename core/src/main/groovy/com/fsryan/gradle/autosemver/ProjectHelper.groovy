@@ -11,4 +11,20 @@ class ProjectHelper {
     static boolean hasSubprojects(Project p) {
         return !p.subprojects.isEmpty()
     }
+
+    static boolean isAndroidProject(Project p) {
+        return p.hasProperty('android')
+    }
+
+    static void updateProjectVersion(Project project, VersionSummary versionSummary) {
+        project.version = versionSummary.toString()
+        if (isAndroidProject(project)) {
+            def androidExt = project.extensions.findByName('android')
+            def defaultConfig = androidExt.properties.get('defaultConfig')
+            println "Setting android defaultConfig versionName to: ${project.version}"
+            println "Setting android defaultConfig versionCode to: ${versionSummary.toVersionCode()}"
+            defaultConfig.versionName = project.version
+            defaultConfig.versionCode = versionSummary.toVersionCode()
+        }
+    }
 }

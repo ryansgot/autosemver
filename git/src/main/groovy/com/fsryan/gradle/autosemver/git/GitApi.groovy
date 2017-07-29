@@ -20,15 +20,15 @@ class GitApi implements SourceControlApi {
     @Override
     boolean commit(String fileName, String message) {
         git('add', fileName)
-        git('commit', '-m', "'$message'")
+        git('commitStatus', '-m', "'$message'")
         return true
     }
 
     @Override
     boolean push(String remote, String branch) {
-        throwIfNullOrEmpty(remote, "Cannot push to null/empty remote")
-        throwIfNullOrEmpty(branch, "Cannot push to null/empty branch")
-        git('push', remote, branch)
+        throwIfNullOrEmpty(remote, "Cannot pushStatus to null/empty remote")
+        throwIfNullOrEmpty(branch, "Cannot pushStatus to null/empty branch")
+        git('pushStatus', remote, branch)
         return true
     }
 
