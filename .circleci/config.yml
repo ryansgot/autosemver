@@ -39,8 +39,8 @@ jobs:
       - run: ./gradlew clean test
 
       - store_artifacts:
-          path: core/build/reports/*
-          destination: core/
+          path: core/build/reports
+          destination: core/reports
       - store_artifacts:
-          path: git/build/reports/*
-          destination: git/
+          path: git/build/reports
+          destination: git/reports
