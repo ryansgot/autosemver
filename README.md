@@ -46,6 +46,7 @@ autosemver {
             versionIncrement = "patch"
             preRelease = 'SNAPSHOT' // adds -SNAPSHOT to the version
             metaData = Long.toString(new Date().getTime())  // add the +timestamp as meta data
+            taskDependencies = ['test']
         }
 
         // Then, when the build is verified to be working, you would merge to
@@ -58,6 +59,7 @@ autosemver {
             pushRemote = 'origin'
             versionIncrement = 'minor'
             preRelease = "alpha"
+            taskDependencies = ['test']
         }
 
         // Then, when your alpha customers have signed off, merging to beta
@@ -69,6 +71,7 @@ autosemver {
             pullRemote = 'origin'
             pushRemote = 'origin'
             preRelease = "beta" // updates the preRelease to -beta
+            taskDependencies = ['test']
         }
 
         // Then, when your beta customers have signed off, merging to master
@@ -80,6 +83,7 @@ autosemver {
             skipCiCommitMessageSuffix = '[skip ci]'
             pullRemote = 'origin'
             pushRemote = 'origin'
+            taskDependencies = ['test']
         }
     }
 }
