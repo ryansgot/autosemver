@@ -56,9 +56,8 @@ autosemver {
             skipCiCommitMessageSuffix = '[skip ci]'
             pullRemote = 'origin'
             pushRemote = 'origin'
-            versionIncrement = 'minor'  // make sure to build AFTER pushing version bump commit
+            versionIncrement = 'minor'
             preRelease = "alpha"
-            // not setting meta data removes previous meta data
         }
 
         // Then, when your alpha customers have signed off, merging to beta
@@ -70,8 +69,6 @@ autosemver {
             pullRemote = 'origin'
             pushRemote = 'origin'
             preRelease = "beta" // updates the preRelease to -beta
-            // not setting versionIncrement preserves previous version
-            // not setting meta data removes previous meta data
         }
 
         // Then, when your beta customers have signed off, merging to master
@@ -80,11 +77,9 @@ autosemver {
         // the major.minor.patch version and removes any preRelease or
         // meta data
         master {
+            skipCiCommitMessageSuffix = '[skip ci]'
             pullRemote = 'origin'
             pushRemote = 'origin'
-            // not setting versionIncrement preserves previous major.minor.patch version
-            // not setting preRelease removes previous preRelease
-            // not setting meta data removes previous meta data
         }
     }
 }
