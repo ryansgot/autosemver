@@ -10,6 +10,8 @@ import static org.gradle.testkit.runner.TaskOutcome.SUCCESS
 
 class AutoSemVerGitPluginAndroidTest extends Specification {
 
+    private static final String defaultAndroidHome = "sdk.dir=${System.getenv('HOME')}${File.separator}Android${File.separator}Sdk"
+
     @Rule final TemporaryFolder testProjectDir = new TemporaryFolder() {
         @Override
         protected void after() {}
@@ -36,7 +38,7 @@ class AutoSemVerGitPluginAndroidTest extends Specification {
     def "something"() {
         given:
         versionLockFile << '1.2.3-alpha+meta'
-        localPropertiesFile << "sdk.dir=${System.getenv('HOME')}${File.separator}Android${File.separator}Sdk"
+        localPropertiesFile << "sdk.dir=${System.getenv('ANDROID_HOME') ?: defaultAndroidHome}"
         buildFile << new File(getClass().getClassLoader().getResource('basic_android_build.gradle').toURI()).text
 
         when:

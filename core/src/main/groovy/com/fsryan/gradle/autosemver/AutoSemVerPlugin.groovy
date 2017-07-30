@@ -71,7 +71,7 @@ abstract class AutoSemVerPlugin<T extends SourceControlApi> implements Plugin<Pr
         vbt.sourceControlApi = sourceControlApi()
         vbt.versionFile = ext.getVersionFile(project)
         vbt.branchConfig = overrideRootProjectValues(project, branchConfig)
-        vbt.dependsOn(branchConfig.taskDependencies ?: [])
+        vbt.dependsOn(vbt.branchConfig.taskDependencies ?: [])
 
         if (isRootProject(project)) {
             project.tasks.create(VERSION_BUMP_TASK_NAME, {
