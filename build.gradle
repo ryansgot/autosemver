@@ -53,6 +53,15 @@ allprojects {
         }
     }
 
+    task javadocJar(type: Jar, dependsOn: javadoc) {
+        classifier = 'javadoc'
+        from javadoc.destinationDir
+    }
+
+    artifacts {
+        archives javadocJar
+    }
+
     publishing {
         publications {
             maven(MavenPublication) {
