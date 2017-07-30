@@ -37,11 +37,7 @@ class LocalVersionBumpTask extends DefaultTask {
             versionSummary.increment(branchConfig.versionIncrement)
         }
         // TODO: right now, this only allows for overwriting preRelease and metaData--perhaps you could create a more rich set of features
-        if (branchConfig.isPreRelease()) {
-            versionSummary.preRelease = branchConfig.preRelease
-        }
-        if (branchConfig.hasMetaData()) {
-            versionSummary.metaData = branchConfig.metaData
-        }
+        versionSummary.preRelease = branchConfig.isPreRelease() ? branchConfig.preRelease : null
+        versionSummary.metaData = branchConfig.hasMetaData() ? branchConfig.metaData : null
     }
 }
