@@ -1,6 +1,7 @@
 package com.fsryan.gradle.autosemver
 
 import junit.runner.Version
+import org.gradle.internal.impldep.org.apache.maven.repository.internal.VersionsMetadataGeneratorFactory
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -232,5 +233,56 @@ abstract class VersionSummaryTest {
         }
     }
 
+    @RunWith(Parameterized.class)
+    static class Increment {
+
+        private final String version
+        private final String versionIncrement
+        private final int expectedMajor
+        private final int expectedMinor
+        private final int expectedPatch
+
+        private VersionSummary versionSummaryUnderTest
+
+        Increment(String version, String versionIncrement, int expectedMajor, int expectedMinor, int expectedPatch) {
+            this.version = version
+            this.versionIncrement = versionIncrement
+            this.expectedMajor = expectedMajor
+            this.expectedMinor = expectedMinor
+            this.expectedPatch = expectedPatch
+        }
+
+        @Parameterized.Parameters
+        static Collection<Object[]> data() {
+            Object[][] data = new Object[5][5]
+            data[0] = ["1.2.99", "major", 2, 0, 0]
+            data[1] = ["1.2.99", "minor", 1, 3, 0]
+            data[2] = ["1.2.99", "patch", 1, 2, 100]
+            data[3] = ["1.2.99", null, 1, 2, 99]
+            data[4] = ["1.2.99", "", 1, 2, 99]
+            return data
+        }
+
+        @Before
+        void setUpVersionSummary() {
+            versionSummaryUnderTest = new VersionSummary(version)
+            versionSummaryUnderTest.increment(versionIncrement)
+        }
+
+        @Test
+        void shouldHaveCorrectMajorVersion() {
+            assertEquals(expectedMajor, versionSummaryUnderTest.major)
+        }
+
+        @Test
+        void shouldHaveCorrectMinorVersion() {
+            assertEquals(expectedMinor, versionSummaryUnderTest.minor)
+        }
+
+        @Test
+        void shouldHaveCorrectPatchVersion() {
+            assertEquals(expectedPatch, versionSummaryUnderTest.patch)
+        }
+    }
 
 }

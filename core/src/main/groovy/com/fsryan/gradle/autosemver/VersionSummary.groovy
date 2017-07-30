@@ -71,12 +71,19 @@ class VersionSummary implements Comparable<VersionSummary> {
     }
 
     void increment(String versionIncrement) {
+        if (versionIncrement == null || versionIncrement.isEmpty()) {
+            return
+        }
+
         if ("patch".equalsIgnoreCase(versionIncrement)) {
             patch++
         } else if ("minor".equalsIgnoreCase(versionIncrement)) {
             minor++
+            patch = 0
         } else if ("major".equalsIgnoreCase(versionIncrement)) {
             major++
+            minor = 0
+            patch = 0
         } else {
             throw new IllegalArgumentException("Version part not found: $versionIncrement")
         }
