@@ -97,7 +97,7 @@ autosemver {
 Given the above config, if your current branch is integration, alpha, beta, or master, then the appropriate incrementing of the version will happen.
 
 ## Why create autosemver?
-I never wanted to manually bump the version of my libraries/apps again. There are two main problems doing this manually:
+I never wanted to manually bump the version of my libraries/apps again. There are a few problems doing this manually:
 1. Inevitably, a developer will forget to bump the version prior to publishing and accidentally overwrite some previously published version.
 2. Increasing the version of one low-level library will have a cascading effect wherein you have to not only change the version dependency in the consumers of the libraries, but you have to remember to bump their versions as well.
 3. It takes time and brainpower that would be better spent developing.
