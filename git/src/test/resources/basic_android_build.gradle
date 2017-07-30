@@ -1,0 +1,70 @@
+buildscript {
+    repositories {
+        jcenter()
+    }
+    dependencies {
+        classpath 'com.android.tools.build:gradle:2.2.3'    // TODO: make this configurable test with 2.3+
+    }
+}
+
+plugins {
+    id 'autosemver-git'
+}
+
+apply plugin: 'com.android.application'
+
+android {
+    compileSdkVersion 25
+    buildToolsVersion "25.0.2"
+    defaultConfig {
+        applicationId "com.example.android.project"
+        minSdkVersion 16
+        targetSdkVersion 25
+        testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
+    }
+    buildTypes {
+        debug {
+            testCoverageEnabled true
+            minifyEnabled false
+        }
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+        }
+    }
+}
+
+dependencies {
+    compile fileTree(dir: 'libs', include: ['*.jar'])
+    compile "com.android.support:appcompat-v7:25.2.0"
+}
+
+class FakeGitApi extends com.fsryan.gradle.autosemver.git.GitApi {
+    String currentBranch() {
+        return 'currentBranch'
+    }
+    boolean checkoutNewBranch(String branchName) {
+        return true
+    }
+    boolean commit(String filename, String message) {
+        return true
+    }
+    boolean push(String remote, String branchName) {
+        return true
+    }
+}
+
+autosemver {
+    branchConfigs {
+        currentBranch {
+            skipCiCommitMessageSuffix = "[skip ci]"
+            versionIncrement = "minor"
+            preRelease = "alpha"
+            metaData = "something"
+            pullRemote = "origin"
+            pushRemote = "origin"
+        }
+    }
+}
+
+((com.fsryan.gradle.autosemver.git.AutoSemVerGitPlugin) plugins.findPlugin('autosemver-git')).gitApi = new FakeGitApi()

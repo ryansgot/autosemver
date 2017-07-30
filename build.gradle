@@ -1,30 +1,82 @@
 buildscript {
     repositories {
-        mavenCentral()
         jcenter()
     }
     dependencies {
         classpath 'com.saantiaguilera.gradle.publish.helper:core:3.0.0'
+        classpath 'com.jfrog.bintray.gradle:gradle-bintray-plugin:1.7.3'
     }
 }
 
 apply plugin: 'com.saantiaguilera.gradle.publish.helper'
 
 ext {
-    groupId = 'com.fsryan.gradle'
+    groupId = 'com.fsryan.gradle.autosemver'
     versionName = '0.0.1'
-    artifactId = 'autosemver'
+}
+
+allprojects {
+    apply plugin: 'groovy'
+    apply plugin: 'maven'
+    apply plugin: 'maven-publish'
+    apply plugin: 'com.jfrog.bintray'
+    apply plugin: 'jacoco'
+
+    repositories {
+        jcenter()
+    }
+
+    group = rootProject.groupId
+    version = rootProject.versionName
+
+    jacoco {
+        toolVersion = "0.7.6.+"
+    }
+
+    task jacocoReport(type: JacocoReport, dependsOn: 'test') {
+        group = 'Reporting'
+        description = 'Generate Jacoco coverage reports after running tests.'
+
+        executionData = files('build/jacoco/test.exec')
+        sourceDirectories = files('src/main/groovy')
+        classDirectories = fileTree(
+                dir: 'build/classes',
+                excludes: [
+                        '**/*Test.class'
+                ]
+        )
+
+        reports {
+            xml.enabled true
+            csv.enabled false
+            html.enabled = true
+        }
+    }
+
+    publishing {
+        publications {
+            maven(MavenPublication) {
+                groupId = rootProject.group
+                artifactId = "${rootProject.name}-${project.name}"
+                version = rootProject.version
+                from components.java
+            }
+        }
+    }
 }
 
 publishGlobalConfigurations {
     groupId = "$groupId"
     versionName = "$versionName"
 
-    artifactsMappings = ['autosemver' : "$artifactId"]
+    artifactsMappings = [
+            'core' : 'autosemver-core',
+            'git' : 'autosemver-git'
+    ]
 
     bintrayRepository = 'maven'
 
-    githubUrl = "https://github.com/saantiaguilera/android-api-SecureKeys"
+    githubUrl = "https://github.com/ryansgot/autosemver"
 
     bintrayUser = project.hasProperty('bintrayUser') ? project.getProperty('bintrayUser') : ''
     bintrayApiKey = project.hasProperty('bintrayApiKey') ? project.getProperty('bintrayApiKey') : ''
