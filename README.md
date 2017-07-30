@@ -89,7 +89,7 @@ autosemver {
 }
 ```
 3. In each subproject, create a file called version.lock, and populate it with your project's current version.
-4. Remove any ```project.version = ``` code from any versioned project's build.gradle (if an android project, also remove anything that sets the ```android.defautConfig.versionName``` or ```android.defaultConfig.versionCode``` as this will be handled for you by autosemver.
+4. Remove any ```project.version = ``` code from any versioned project's build.gradle (if an android project, also remove anything that sets the ```android.defautConfig.versionName``` or ```android.defaultConfig.versionCode``` as this will be handled for you by autosemver).
 5. On the command line:
 ```bash
 ./gradlew bumpVersion
@@ -122,11 +122,12 @@ bumpVersionLocally - Bump the version on the local machine
 There is probably not much reason to run this yourself. It just commits the changes to each versioned project's version.lock file on the local machine. Because this is a task dependency for ```bumpVersion```, running the ```bumpVersion``` task will ensure that ```bumpVersionLocally``` gets run and is successful first.
 ### bumpVersion
 When run, will:
-1. Check whether the current branch has been configured in the autosemver extension. If not skip all of the following steps.
-2. Reads the current version from the project's version.lock file
+1. Set the project.version property based upon the version.lock file (in android apps, also sets versionName and versionCode in defaultConfig)
+2. Check whether the current branch has been configured in the autosemver extension. If not skip all of the following steps.
 3. Increments the version and writes to the project's version.lock file
 4. Commits the changes to the version.lock file locally
 5. Pushes to the remote configured in the ```pushRemote``` property of the autosemver.buildConfig.branchName property on the current branch.
+6. Updates the project's project.version property based upon the version.lock file (in android apps, also sets versionName and versionCode in defaultConfig)
 
 ## How does autosemver prevent infini-build?
-Since autosemver pushes to the current branch, and since your CI environment is monitoring the current branch, you could see how you may end up with an unending cycle of builds. However, Your CI system should be able to filter commits with some string like ```'[skip ci]```. If it can't do that, then we may need to extend this plugin to account for that.
+Since autosemver pushes to the current branch, and since your CI environment is monitoring the current branch, you could see how you may end up with an unending cycle of builds. However, Your CI system should be able to filter commits with some string like ```'[skip ci]'```. If it can't do that, then we may need to extend this plugin to account for that.
