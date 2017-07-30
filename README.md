@@ -14,7 +14,7 @@ buildscript {
     }
 }
 ```
-2. In your any versioned project's build.gradle (you can also embed this in the allprojects closure of your root project if you want the same config for all subprojects)
+2. In your any versioned project's build.gradle (you can nest this in the subprojects closure of your root project's build.gradle if you want the same config for all subprojects)
 ```groovy
 // At the top
 plugins {
