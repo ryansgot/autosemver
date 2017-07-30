@@ -60,7 +60,7 @@ autosemver {
         }
 
         // Then, when your beta customers have signed off, merging to master
-        // from alpha would presumably also publish to whatever stable channel
+        // from beta would presumably also publish to whatever stable channel
         // holds your stable versions. Therefore, this configuration preserves
         // the major.minor.patch version and removes any preRelease or
         // meta data
