@@ -20,7 +20,7 @@ class GitApi implements SourceControlApi {
     @Override
     boolean commit(String fileName, String message) {
         git('add', fileName)
-        git('commitStatus', '-m', "'$message'")
+        git('commit', '-m', "'$message'")
         return true
     }
 
@@ -28,12 +28,11 @@ class GitApi implements SourceControlApi {
     boolean push(String remote, String branch) {
         throwIfNullOrEmpty(remote, "Cannot pushStatus to null/empty remote")
         throwIfNullOrEmpty(branch, "Cannot pushStatus to null/empty branch")
-        git('pushStatus', remote, branch)
+        git('push', remote, branch)
         return true
     }
 
     private String git(Object... arguments) {
-        println "command: git $arguments"
         def output = new ByteArrayOutputStream()
         project.exec {
             executable 'git'
@@ -41,9 +40,7 @@ class GitApi implements SourceControlApi {
             standardOutput output
             ignoreExitValue = true
         }.assertNormalExitValue()
-        String out = output.toString().trim()
-        println "output: $out"
-        return out
+        return output.toString().trim()
     }
 
     private static void throwIfNullOrEmpty(String str, String message) {
