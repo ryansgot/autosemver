@@ -10,12 +10,10 @@ buildscript {
 
 apply plugin: 'com.saantiaguilera.gradle.publish.helper'
 
-ext {
-    groupId = 'com.fsryan.gradle.autosemver'
-    versionName = '0.0.1'
-}
+group = 'com.fsryan.gradle.autosemver'
+version = '0.0.1'
 
-allprojects {
+subprojects {
     apply plugin: 'groovy'
     apply plugin: 'maven'
     apply plugin: 'maven-publish'
@@ -26,8 +24,8 @@ allprojects {
         jcenter()
     }
 
-    group = rootProject.groupId
-    version = rootProject.versionName
+    group = rootProject.group
+    version = rootProject.version
 
     jacoco {
         toolVersion = "0.7.6.+"
@@ -72,15 +70,23 @@ allprojects {
             }
         }
     }
+
+    jar {
+        archiveName = "${rootProject.name}-${project.name}"
+    }
+
+    afterEvaluate {
+        tasks.findByName('publishModule').dependsOn('test')
+    }
 }
 
 publishGlobalConfigurations {
-    groupId = "$groupId"
-    versionName = "$versionName"
+    groupId = rootProject.group
+    versionName = rootProject.version
 
     artifactsMappings = [
-            'core' : 'autosemver-core',
-            'git' : 'autosemver-git'
+            'core' : "${rootProject.name}-core",
+            'git' : "${rootProject.name}-git"
     ]
 
     bintrayRepository = 'maven'
