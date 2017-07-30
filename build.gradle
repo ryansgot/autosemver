@@ -54,10 +54,16 @@ subprojects {
     task javadocJar(type: Jar, dependsOn: javadoc) {
         classifier = 'javadoc'
         from javadoc.destinationDir
+        archiveName = "${rootProject.name}-${project.name}-${rootProject.version}-javadoc.jar"
+    }
+
+    sourcesJar {
+        archiveName = "${rootProject.name}-${project.name}-${rootProject.version}-sources.jar"
     }
 
     artifacts {
         archives javadocJar
+        archives sourcesJar
     }
 
     publishing {
@@ -68,15 +74,31 @@ subprojects {
                 version = rootProject.version
                 from components.java
             }
+            bintray(MavenPublication) {
+                groupId = rootProject.group
+                artifactId = "${rootProject.name}-${project.name}"
+                version = rootProject.version
+                from components.java
+            }
         }
     }
 
     jar {
-        archiveName = "${rootProject.name}-${project.name}"
+        archiveName "${rootProject.name}-${project.name}-${rootProject.version}.jar"
+    }
+
+    model {
+        tasks.generatePomFileForBintrayPublication {
+            doFirst {
+                file("$buildDir/poms").mkdirs()
+            }
+            destination = file("$buildDir/poms/pom-default.xml")
+        }
     }
 
     afterEvaluate {
         tasks.findByName('publishModule').dependsOn('test')
+        tasks.findByName('bintrayUpload').dependsOn('generatePomFileForBintrayPublication')
     }
 }
 
@@ -97,5 +119,5 @@ publishGlobalConfigurations {
     bintrayApiKey = project.hasProperty('bintrayApiKey') ? project.getProperty('bintrayApiKey') : ''
 
     licenseUrl = "http://www.opensource.org/licenses/MIT"
-    licenseName = "The MIT License"
+    licenseName = "MIT"
 }
