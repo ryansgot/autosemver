@@ -30,7 +30,7 @@ autosemver {
             pushRemote = 'origin'
             versionIncrement = "patch"
             preRelease = 'SNAPSHOT' // adds -SNAPSHOT to the version
-            metaData = Long.toString(newDepending upon the branch you're currently on, the version will be properly set and incremented. Date().getTime())  // add the +timestamp as meta data
+            metaData = Long.toString(new Date().getTime())  // add the +timestamp as meta data
         }
 
         // Then, when the build is verified to be working, you would merge to
