@@ -7,7 +7,18 @@ dependencies {
 }
 
 publishConfigurations {
+    groupId = rootProject.group
     artifactId = project.name
     versionName = project.version
     packageDescription = 'Core classes and behaviors for autosemver--must be extended to be useful'
+
+    bintrayRepository = 'maven'
+
+    githubUrl = "https://github.com/ryansgot/autosemver"
+
+    bintrayUser = project.hasProperty('bintrayUser') ? project.getProperty('bintrayUser') : ''
+    bintrayApiKey = project.hasProperty('bintrayApiKey') ? project.getProperty('bintrayApiKey') : ''
+
+    licenseUrl = "http://www.opensource.org/licenses/MIT"
+    licenseName = "MIT"
 }

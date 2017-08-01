@@ -5,7 +5,7 @@ buildscript {
     dependencies {
         classpath 'com.saantiaguilera.gradle.publish.helper:core:3.0.0'
         classpath 'com.jfrog.bintray.gradle:gradle-bintray-plugin:1.7.3'
-        classpath 'com.fsryan.gradle.autosemver:autosemver-git:0.0.2'
+        classpath 'com.fsryan.gradle.autosemver:autosemver-git:0.0.3'
     }
 }
 
@@ -13,10 +13,10 @@ apply plugin: 'autosemver-git'
 apply plugin: 'com.saantiaguilera.gradle.publish.helper'
 
 group = 'com.fsryan.gradle.autosemver'
+long buildTime = new Date().getTime()
 
 subprojects {
     apply plugin: 'autosemver-git'
-    apply plugin: 'com.saantiaguilera.gradle.publish.helper'
     apply plugin: 'groovy'
     apply plugin: 'maven'
     apply plugin: 'maven-publish'
@@ -68,13 +68,13 @@ subprojects {
             maven(MavenPublication) {
                 groupId = rootProject.group
                 artifactId = project.name
-                version = rootProject.version
+                version = project.version
                 from components.java
             }
             bintray(MavenPublication) {
                 groupId = rootProject.group
                 artifactId = project.name
-                version = rootProject.version
+                version = project.version
                 from components.java
             }
         }
@@ -95,20 +95,6 @@ subprojects {
     }
 }
 
-publishGlobalConfigurations {
-    groupId = rootProject.group
-
-    bintrayRepository = 'maven'
-
-    githubUrl = "https://github.com/ryansgot/autosemver"
-
-    bintrayUser = project.hasProperty('bintrayUser') ? project.getProperty('bintrayUser') : ''
-    bintrayApiKey = project.hasProperty('bintrayApiKey') ? project.getProperty('bintrayApiKey') : ''
-
-    licenseUrl = "http://www.opensource.org/licenses/MIT"
-    licenseName = "MIT"
-}
-
 allprojects {
     autosemver {
         branchConfigs {
@@ -118,7 +104,7 @@ allprojects {
                 pushRemote = 'origin'
                 versionIncrement = "patch"
                 preRelease = 'test'
-                metaData = Long.toString(new Date().getTime())
+                metaData = Long.toString(buildTime)
             }
             alpha { // <-- for new features
                 skipCiCommitMessageSuffix = '[skip ci]'
