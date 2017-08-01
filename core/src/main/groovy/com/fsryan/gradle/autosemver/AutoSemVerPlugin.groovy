@@ -22,6 +22,10 @@ abstract class AutoSemVerPlugin<T extends SourceControlApi> implements Plugin<Pr
         final NamedDomainObjectContainer<BranchConfig> branchConfigs = project.container(BranchConfig)
         def ext = project.extensions.create(AutoSemVerExt.NAME, AutoSemVerExt, branchConfigs)
 
+        if (!dependOnSubprojects(project)) {
+            updateProjectVersion(project, new VersionSummary(ext.getVersionFile(project).text))
+        }
+
         project.afterEvaluate {
             final String currentBranch = sourceControlApi().currentBranch()
             BranchConfig branchConfig = null
@@ -59,8 +63,6 @@ abstract class AutoSemVerPlugin<T extends SourceControlApi> implements Plugin<Pr
     }
 
     void configureVersionedProject(Project project, AutoSemVerExt ext, BranchConfig branchConfig) {
-        updateProjectVersion(project, new VersionSummary(ext.getVersionFile(project).text))
-
         if (branchConfig == null) {
             createNoOpTasks(project, null)
             return
