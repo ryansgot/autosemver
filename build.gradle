@@ -5,15 +5,16 @@ buildscript {
     dependencies {
         classpath 'com.saantiaguilera.gradle.publish.helper:core:3.0.0'
         classpath 'com.jfrog.bintray.gradle:gradle-bintray-plugin:1.7.3'
+        classpath 'com.fsryan.gradle.autosemver:autosemver-git:0.0.1'
     }
 }
 
 apply plugin: 'com.saantiaguilera.gradle.publish.helper'
 
 group = 'com.fsryan.gradle.autosemver'
-version = '0.0.1'
 
 subprojects {
+    apply plugin: 'autosemver-git'
     apply plugin: 'groovy'
     apply plugin: 'maven'
     apply plugin: 'maven-publish'
@@ -90,6 +91,37 @@ subprojects {
     afterEvaluate {
         tasks.findByName('publishModule').dependsOn('test')
         tasks.findByName('bintrayUpload').dependsOn('generatePomFileForBintrayPublication')
+    }
+
+    autosemver {
+        branchConfigs {
+            integration {
+                skipCiCommitMessageSuffix = '[skip ci]'
+                pullRemote = 'origin'
+                pushRemote = 'origin'
+                versionIncrement = "patch"
+                preRelease = 'test'
+                metaData = Long.toString(new Date().getTime())
+            }
+            alpha { // <-- for new features (deploy privately)
+                skipCiCommitMessageSuffix = '[skip ci]'
+                pullRemote = 'origin'
+                pushRemote = 'origin'
+                versionIncrement = "minor"
+                preRelease = 'alpha'
+            }
+            beta { // <-- for bug fixes (deploy to beta channel)
+                skipCiCommitMessageSuffix = '[skip ci]'
+                pullRemote = 'origin'
+                pushRemote = 'origin'
+                preRelease = 'beta'
+            }
+            master {    // <-- for bug fixes (deploy to bintray)
+                skipCiCommitMessageSuffix = '[skip ci]'
+                pullRemote = 'origin'
+                pushRemote = 'origin'
+            }
+        }
     }
 }
 
