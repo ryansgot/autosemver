@@ -109,33 +109,35 @@ publishGlobalConfigurations {
     licenseName = "MIT"
 }
 
-autosemver {
-    branchConfigs {
-        integration {
-            skipCiCommitMessageSuffix = '[skip ci]'
-            pullRemote = 'origin'
-            pushRemote = 'origin'
-            versionIncrement = "patch"
-            preRelease = 'test'
-            metaData = Long.toString(new Date().getTime())
-        }
-        alpha { // <-- for new features
-            skipCiCommitMessageSuffix = '[skip ci]'
-            pullRemote = 'origin'
-            pushRemote = 'origin'
-            versionIncrement = "minor"
-            preRelease = 'alpha'
-        }
-        beta { // <-- for bug fixes
-            skipCiCommitMessageSuffix = '[skip ci]'
-            pullRemote = 'origin'
-            pushRemote = 'origin'
-            preRelease = 'beta'
-        }
-        master {    // <-- stable version
-            skipCiCommitMessageSuffix = '[skip ci]'
-            pullRemote = 'origin'
-            pushRemote = 'origin'
+allprojects {
+    autosemver {
+        branchConfigs {
+            integration {
+                skipCiCommitMessageSuffix = '[skip ci]'
+                pullRemote = 'origin'
+                pushRemote = 'origin'
+                versionIncrement = "patch"
+                preRelease = 'test'
+                metaData = Long.toString(new Date().getTime())
+            }
+            alpha { // <-- for new features
+                skipCiCommitMessageSuffix = '[skip ci]'
+                pullRemote = 'origin'
+                pushRemote = 'origin'
+                versionIncrement = "minor"
+                preRelease = 'alpha'
+            }
+            beta { // <-- for bug fixes
+                skipCiCommitMessageSuffix = '[skip ci]'
+                pullRemote = 'origin'
+                pushRemote = 'origin'
+                preRelease = 'beta'
+            }
+            master {    // <-- stable version
+                skipCiCommitMessageSuffix = '[skip ci]'
+                pullRemote = 'origin'
+                pushRemote = 'origin'
+            }
         }
     }
 }
