@@ -45,11 +45,10 @@ jobs:
       - store_artifacts:
           path: git/build/reports
           destination: git/reports
-          
-#TODO: enable deployment to bintray for alpha, beta, and master
-#      - deploy:
-#          name: deploy to bintray
-#          command: |
-#            if [ "$CIRCLE_BRANCH" == "alpha" ] || [ "$CIRCLE_BRANCH" == "beta" ] [ "$CIRCLE_BRANCH" == "master" ]; then
-#              ./gradlew publishModules
-#            fi
+
+      - deploy:
+          name: deploy to bintray
+          command: |
+            if [ "$CIRCLE_BRANCH" == "alpha" ] || [ "$CIRCLE_BRANCH" == "beta" ] || [ "$CIRCLE_BRANCH" == "master" ]; then
+              ./gradlew publishModules
+            fi
