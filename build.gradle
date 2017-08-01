@@ -15,6 +15,7 @@ group = 'com.fsryan.gradle.autosemver'
 
 subprojects {
     apply plugin: 'autosemver-git'
+    apply plugin: 'com.saantiaguilera.gradle.publish.helper'
     apply plugin: 'groovy'
     apply plugin: 'maven'
     apply plugin: 'maven-publish'
@@ -103,20 +104,20 @@ subprojects {
                 preRelease = 'test'
                 metaData = Long.toString(new Date().getTime())
             }
-            alpha { // <-- for new features (deploy privately)
+            alpha { // <-- for new features
                 skipCiCommitMessageSuffix = '[skip ci]'
                 pullRemote = 'origin'
                 pushRemote = 'origin'
                 versionIncrement = "minor"
                 preRelease = 'alpha'
             }
-            beta { // <-- for bug fixes (deploy to beta channel)
+            beta { // <-- for bug fixes
                 skipCiCommitMessageSuffix = '[skip ci]'
                 pullRemote = 'origin'
                 pushRemote = 'origin'
                 preRelease = 'beta'
             }
-            master {    // <-- for bug fixes (deploy to bintray)
+            master {    // <-- stable version
                 skipCiCommitMessageSuffix = '[skip ci]'
                 pullRemote = 'origin'
                 pushRemote = 'origin'
@@ -127,12 +128,6 @@ subprojects {
 
 publishGlobalConfigurations {
     groupId = rootProject.group
-    versionName = rootProject.version
-
-    artifactsMappings = [
-            'core' : "${rootProject.name}-core",
-            'git' : "${rootProject.name}-git"
-    ]
 
     bintrayRepository = 'maven'
 
