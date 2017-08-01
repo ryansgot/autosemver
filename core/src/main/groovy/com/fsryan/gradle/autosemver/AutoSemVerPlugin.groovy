@@ -96,7 +96,7 @@ abstract class AutoSemVerPlugin<T extends SourceControlApi> implements Plugin<Pr
 
         AutoSemVerExt rootExt = project.rootProject.extensions.findByName('autosemver')
         if (rootExt == null) {
-            log.warning("Cannot find autosemver extension in root project")
+            log.warn("Cannot find autosemver extension in root project")
             return branchConfig
         }
 
@@ -104,7 +104,7 @@ abstract class AutoSemVerPlugin<T extends SourceControlApi> implements Plugin<Pr
         try {
             rootBranchConfig = rootExt.branchConfigOf(branchConfig.name)
         } catch (UnknownDomainObjectException udoe) {
-            log.warning("Cannot find branchConfig ${branchConfig.name} in root project")
+            log.warn("Cannot find branchConfig ${branchConfig.name} in root project")
             return branchConfig
         }
 

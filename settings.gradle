@@ -1,1 +1,3 @@
 include ':core', ':git'
+project(':core').name = "${rootProject.name}-core"
+project(':git').name = "${rootProject.name}-git"
