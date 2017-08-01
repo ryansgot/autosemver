@@ -7,7 +7,6 @@ jobs:
     working_directory: ~/autosemver
 
     environment:
-      # Customize the JVM maximum heap limit
       JVM_OPTS: -Xmx2048m
       TERM: dumb
 
@@ -27,7 +26,8 @@ jobs:
             - ~/.m2
           key: v1-dependencies-{{ checksum "build.gradle" }}
 
-      - run: ./gradlew clean test
+      # publishModules will take effect only when the current branch is configured in the root project's build.gradle
+      - run: ./gradlew clean test publishModules
 
       - store_artifacts:
           path: core/build/reports
@@ -40,8 +40,5 @@ jobs:
           name: deploy to bintray
           command: |
             if [ "$CIRCLE_BRANCH" == "master" ]; then
-              ./gradlew bumpVersion publishModules
-            elif [ "$CIRCLE_BRANCH" == "integration" ]; then
-              ./gradlew bumpVersion
-              echo "would be deploying snapshot somewhere"
+              ./gradlew publishModules
             fi
