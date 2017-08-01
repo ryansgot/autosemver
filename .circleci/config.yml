@@ -21,6 +21,9 @@ jobs:
 
       - run: ./gradlew dependencies
 
+      - run: which git
+      - run: git rev-parse --abbrev-ref HEAD
+
       - save_cache:
           paths:
             - ~/.m2
