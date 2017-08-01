@@ -26,3 +26,9 @@ task createClasspathManifest {
 dependencies {
     testRuntime files(createClasspathManifest)
 }
+
+publishConfigurations {
+    versionName = project.version
+    artifactId = project.name
+    packageDescription = 'gradle plugin integrating autosemver with git'
+}

@@ -5,15 +5,17 @@ buildscript {
     dependencies {
         classpath 'com.saantiaguilera.gradle.publish.helper:core:3.0.0'
         classpath 'com.jfrog.bintray.gradle:gradle-bintray-plugin:1.7.3'
+        classpath 'com.fsryan.gradle.autosemver:autosemver-git:0.0.1'
     }
 }
 
 apply plugin: 'com.saantiaguilera.gradle.publish.helper'
 
 group = 'com.fsryan.gradle.autosemver'
-version = '0.0.1'
 
 subprojects {
+    apply plugin: 'autosemver-git'
+    apply plugin: 'com.saantiaguilera.gradle.publish.helper'
     apply plugin: 'groovy'
     apply plugin: 'maven'
     apply plugin: 'maven-publish'
@@ -91,16 +93,41 @@ subprojects {
         tasks.findByName('publishModule').dependsOn('test')
         tasks.findByName('bintrayUpload').dependsOn('generatePomFileForBintrayPublication')
     }
+
+    autosemver {
+        branchConfigs {
+            integration {
+                skipCiCommitMessageSuffix = '[skip ci]'
+                pullRemote = 'origin'
+                pushRemote = 'origin'
+                versionIncrement = "patch"
+                preRelease = 'test'
+                metaData = Long.toString(new Date().getTime())
+            }
+            alpha { // <-- for new features
+                skipCiCommitMessageSuffix = '[skip ci]'
+                pullRemote = 'origin'
+                pushRemote = 'origin'
+                versionIncrement = "minor"
+                preRelease = 'alpha'
+            }
+            beta { // <-- for bug fixes
+                skipCiCommitMessageSuffix = '[skip ci]'
+                pullRemote = 'origin'
+                pushRemote = 'origin'
+                preRelease = 'beta'
+            }
+            master {    // <-- stable version
+                skipCiCommitMessageSuffix = '[skip ci]'
+                pullRemote = 'origin'
+                pushRemote = 'origin'
+            }
+        }
+    }
 }
 
 publishGlobalConfigurations {
     groupId = rootProject.group
-    versionName = rootProject.version
-
-    artifactsMappings = [
-            'core' : "${rootProject.name}-core",
-            'git' : "${rootProject.name}-git"
-    ]
 
     bintrayRepository = 'maven'
 
