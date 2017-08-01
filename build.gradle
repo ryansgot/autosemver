@@ -27,7 +27,6 @@ subprojects {
     }
 
     group = rootProject.group
-    version = rootProject.version
 
     jacoco {
         toolVersion = "0.7.6.+"
