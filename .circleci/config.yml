@@ -50,5 +50,5 @@ jobs:
           name: deploy to bintray
           command: |
             if [ "$CIRCLE_BRANCH" == "alpha" ] || [ "$CIRCLE_BRANCH" == "beta" ] || [ "$CIRCLE_BRANCH" == "master" ]; then
-              ./gradlew publishModules -PbintrayUser=$BINTRAY_USER -PbintrayApiKey=$BINTRAY_API_KEY
+              ./gradlew :autosemver-core:publishModule :autosemver-git:publishModule -PbintrayUser=$BINTRAY_USER -PbintrayApiKey=$BINTRAY_API_KEY
             fi
