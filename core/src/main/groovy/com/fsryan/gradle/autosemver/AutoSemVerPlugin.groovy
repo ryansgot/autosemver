@@ -63,6 +63,8 @@ abstract class AutoSemVerPlugin<T extends SourceControlApi> implements Plugin<Pr
     }
 
     void configureVersionedProject(Project project, AutoSemVerExt ext, BranchConfig branchConfig) {
+        updateProjectVersion(project, new VersionSummary(ext.getVersionFile(project).text))
+
         if (branchConfig == null) {
             createNoOpTasks(project, null)
             return
