@@ -44,7 +44,7 @@ abstract class AutoSemVerPlugin<T extends SourceControlApi> implements Plugin<Pr
     void configureRootProjectWithSubprojects(Project project, BranchConfig branchConfig) {
         project.evaluationDependsOnChildren()
         if (branchConfig == null) {
-            createNoOpTasks(project, null)
+            createNoOpTasks(project, sourceControlApi().currentBranch())
             return
         }
 
@@ -62,7 +62,7 @@ abstract class AutoSemVerPlugin<T extends SourceControlApi> implements Plugin<Pr
         updateProjectVersion(project, new VersionSummary(ext.getVersionFile(project).text))
 
         if (branchConfig == null) {
-            createNoOpTasks(project, null)
+            createNoOpTasks(project, sourceControlApi().currentBranch())
             return
         }
 
