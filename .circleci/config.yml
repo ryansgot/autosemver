@@ -3,6 +3,13 @@ jobs:
   build:
     docker:
       - image: circleci/android:api-25-alpha
+      # environment variables for all commands executed in the primary container
+        environment:
+          GIT_AUTHOR_NAME: circleci
+          GIT_AUTHOR_EMAIL: noreply@circleci.com
+          GIT_COMMITTER_NAME: circleci
+          GIT_COMMITTER_EMAIL: noreply@circleci.com
+          EMAIL: noreply@circleci.com
 
     working_directory: ~/autosemver
 
