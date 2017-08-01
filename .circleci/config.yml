@@ -27,7 +27,7 @@ jobs:
           key: v1-dependencies-{{ checksum "build.gradle" }}
 
       # publishModules will take effect only when the current branch is configured in the root project's build.gradle
-      - run: ./gradlew clean test publishModules
+      - run: ./gradlew clean test bumpVersion
 
       - store_artifacts:
           path: core/build/reports
