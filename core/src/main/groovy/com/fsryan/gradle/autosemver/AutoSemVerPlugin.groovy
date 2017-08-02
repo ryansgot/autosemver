@@ -8,6 +8,7 @@ import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 
 import static com.fsryan.gradle.autosemver.ProjectHelper.hasSubprojects
+import static com.fsryan.gradle.autosemver.ProjectHelper.isAndroidProject
 import static com.fsryan.gradle.autosemver.ProjectHelper.isRootProject
 import static com.fsryan.gradle.autosemver.ProjectHelper.updateProjectVersion
 
@@ -19,12 +20,18 @@ abstract class AutoSemVerPlugin<T extends SourceControlApi> implements Plugin<Pr
 
     @Override
     void apply(Project project) {
+        log.debug("Applying for project ${project.name}; dependsOnSubprojects: ${dependOnSubprojects(project)}; isRootProject: ${isRootProject(project)}; hasSubprojects: ${hasSubprojects(project)}; isAndroidProject: ${isAndroidProject(project)}")
+
         final NamedDomainObjectContainer<BranchConfig> branchConfigs = project.container(BranchConfig)
         def ext = project.extensions.create(AutoSemVerExt.NAME, AutoSemVerExt, branchConfigs)
+
+        log.debug("Before updating project version, version was: ${project.version}")
 
         if (!dependOnSubprojects(project)) {
             updateProjectVersion(project, new VersionSummary(ext.getVersionFile(project).text))
         }
+
+        log.debug("After updating project version, version was: ${project.version}")
 
         project.afterEvaluate {
             final String currentBranch = sourceControlApi().currentBranch()
