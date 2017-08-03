@@ -5,7 +5,7 @@ buildscript {
     dependencies {
         classpath 'com.saantiaguilera.gradle.publish.helper:core:3.0.0'
         classpath 'com.jfrog.bintray.gradle:gradle-bintray-plugin:1.7.3'
-        classpath 'com.fsryan.gradle.autosemver:autosemver-git:0.0.3'
+        classpath 'com.fsryan.gradle.autosemver:autosemver-git:0.1.0-alpha'
     }
 }
 
