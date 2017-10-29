@@ -5,7 +5,7 @@ buildscript {
     dependencies {
         classpath 'com.saantiaguilera.gradle.publish.helper:core:3.0.0'
         classpath 'com.jfrog.bintray.gradle:gradle-bintray-plugin:1.7.3'
-        classpath 'com.fsryan.gradle.autosemver:autosemver-git:0.0.3'
+        classpath 'com.fsryan.gradle.autosemver:autosemver-git:0.1.0-alpha'
     }
 }
 
@@ -76,6 +76,38 @@ subprojects {
                 artifactId = project.name
                 version = project.version
                 from components.java
+            }
+            mavenS3(MavenPublication) {
+                groupId = rootProject.group
+                artifactId = project.name
+                version = project.version
+                from components.java
+                pom.withXml {
+                    asNode().appendNode('build')
+                        .appendNode('extensions')
+                            .appendNode('extension')
+                                .appendNode('groupId', 'org.kuali.maven.wagons').parent()
+                                .appendNode('artifactId', 'maven-s3-wagon').parent()
+                                .appendNode('version', '1.2.1')
+                }
+            }
+        }
+        repositories {
+            maven {
+                name 'release'
+                url "s3://repo.fsryan.com/release"
+                credentials(AwsCredentials) {
+                    accessKey = project.hasProperty("awsMavenAccessKey") ? project.property("awsMavenAccessKey") : ""
+                    secretKey = project.hasProperty("awsMavenSecretKey") ? project.property("awsMavenSecretKey") : ""
+                }
+            }
+            maven {
+                name 'snapshot'
+                url "s3://repo.fsryan.com/snapshot"
+                credentials(AwsCredentials) {
+                    accessKey = project.hasProperty("awsMavenAccessKey") ? project.property("awsMavenAccessKey") : ""
+                    secretKey = project.hasProperty("awsMavenSecretKey") ? project.property("awsMavenSecretKey") : ""
+                }
             }
         }
     }
