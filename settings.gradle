@@ -1,3 +1,4 @@
 include ':core', ':git'
+rootProject.name = 'autosemver'
 project(':core').name = "${rootProject.name}-core"
 project(':git').name = "${rootProject.name}-git"
