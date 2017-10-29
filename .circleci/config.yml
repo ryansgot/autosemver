@@ -51,4 +51,6 @@ jobs:
           command: |
             if [ "$CIRCLE_BRANCH" == "alpha" ] || [ "$CIRCLE_BRANCH" == "beta" ] || [ "$CIRCLE_BRANCH" == "master" ]; then
               ./gradlew :autosemver-core:publishModule :autosemver-git:publishModule -PbintrayUser=$BINTRAY_USER -PbintrayApiKey=$BINTRAY_API_KEY
+            elif [ "$CIRCLE_BRANCH" == "integration" ]; then
+              ./gradlew publishMavenS3PublicationToSnapshotRepository -PawsMavenAccessKey=$AWS_MAVEN_ACCESS_KEY -PawsMavenSecretKey=$AWS_MAVEN_SECRET_KEY
             fi

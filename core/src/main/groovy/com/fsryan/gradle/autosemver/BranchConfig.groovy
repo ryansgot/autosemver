@@ -73,7 +73,7 @@ class BranchConfig {
     }
 
     boolean incrementing() {
-        return versionIncrement.equalsIgnoreCase("major") || versionIncrement.equalsIgnoreCase("minor") || versionIncrement.equalsIgnoreCase("patch")
+        return versionIncrement != null && (versionIncrement.equalsIgnoreCase("major") || versionIncrement.equalsIgnoreCase("minor") || versionIncrement.equalsIgnoreCase("patch"))
     }
 
     boolean isPreRelease() {

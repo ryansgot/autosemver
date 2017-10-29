@@ -1,7 +1,5 @@
 package com.fsryan.gradle.autosemver
 
-import junit.runner.Version
-import org.gradle.internal.impldep.org.apache.maven.repository.internal.VersionsMetadataGeneratorFactory
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
