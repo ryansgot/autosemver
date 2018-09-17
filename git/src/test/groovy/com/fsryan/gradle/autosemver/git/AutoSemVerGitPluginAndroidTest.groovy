@@ -18,6 +18,7 @@ class AutoSemVerGitPluginAndroidTest extends Specification {
     File versionLockFile
     File buildFile
     File localPropertiesFile
+    File manifestFile
     List<File> pluginClasspath
 
     def setup() {
@@ -25,6 +26,8 @@ class AutoSemVerGitPluginAndroidTest extends Specification {
         buildFile = testProjectDir.newFile('build.gradle')
         localPropertiesFile = testProjectDir.newFile('local.properties')
 
+        File mainSrc = testProjectDir.newFolder('src', 'main')
+        manifestFile = new File(mainSrc, 'AndroidManifest.xml')
         def pluginClasspathResource = getClass().classLoader.findResource("plugin-classpath.txt")
         if (pluginClasspathResource == null) {
             throw new IllegalStateException("Did not find plugin classpath resource, run `testClasses` build task.")
@@ -38,6 +41,7 @@ class AutoSemVerGitPluginAndroidTest extends Specification {
         versionLockFile << '1.2.3-alpha+meta'
         localPropertiesFile << localPropertiesText()
         buildFile << new File(getClass().getClassLoader().getResource('basic_android_build.gradle').toURI()).text
+        manifestFile << new File(getClass().getClassLoader().getResource('basic_android_manifest.xml').toURI()).text
 
         when:
         def result = GradleRunner.create()
