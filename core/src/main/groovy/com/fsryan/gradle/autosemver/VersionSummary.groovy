@@ -18,6 +18,7 @@ class VersionSummary implements Comparable<VersionSummary> {
     String metaData
 
     VersionSummary(String value) {
+        value = value.trim()    // <-- prevents mismatching the version string
         if (!validVersionRegex.matcher(value).matches() || countOf('-' as char).inString(value) > 1 || countOf('+' as char).inString(value) > 1) {
             throw new InvalidVersionException(value)
         }
