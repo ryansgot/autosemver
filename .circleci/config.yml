@@ -2,32 +2,33 @@ version: 2
 jobs:
   build:
     docker:
-      - image: circleci/android:api-25-alpha
-
-      # Specify service dependencies here if necessary
-      # CircleCI maintains a library of pre-built images
-      # documented at https://circleci.com/docs/2.0/circleci-images/
-      # - image: circleci/postgres:9.4
+      - image: circleci/android:api-27
+      # environment variables for all commands executed in the primary container
+        environment:
+          GIT_AUTHOR_NAME: circleci
+          GIT_AUTHOR_EMAIL: noreply@circleci.com
+          GIT_COMMITTER_NAME: circleci
+          GIT_COMMITTER_EMAIL: noreply@circleci.com
+          EMAIL: noreply@circleci.com
 
     working_directory: ~/autosemver
 
     environment:
-      # Customize the JVM maximum heap limit
       JVM_OPTS: -Xmx2048m
       TERM: dumb
 
     steps:
+      - add-ssh-keys:
+         fingerprints:
+           - "c9:3d:45:20:5c:62:04:83:81:c2:5f:df:73:46:79:f3"
       - checkout
 
-      # Download and cache dependencies
       - restore_cache:
           keys:
           - v1-dependencies-{{ checksum "build.gradle" }}
           # fallback to using the latest cache if no exact match is found
           - v1-dependencies-
 
-#      - run: echo y | android update sdk --no-ui --all --filter tools,extra-android-m2repository
-#      - run: echo y | android update sdk --no-ui --all --filter build-tools-25.0.2,android-25
       - run: ./gradlew dependencies
 
       - save_cache:
@@ -35,8 +36,8 @@ jobs:
             - ~/.m2
           key: v1-dependencies-{{ checksum "build.gradle" }}
 
-      # run tests!
-      - run: ./gradlew clean test
+      # publishModules will take effect only when the current branch is configured in the root project's build.gradle
+      - run: ./gradlew clean test bumpVersion --stacktrace
 
       - store_artifacts:
           path: core/build/reports
@@ -44,3 +45,12 @@ jobs:
       - store_artifacts:
           path: git/build/reports
           destination: git/reports
+
+      - deploy:
+          name: deploy to bintray
+          command: |
+            if [ "$CIRCLE_BRANCH" == "alpha" ] || [ "$CIRCLE_BRANCH" == "beta" ] || [ "$CIRCLE_BRANCH" == "master" ]; then
+              ./gradlew :autosemver-core:publishModule :autosemver-git:publishModule -PbintrayUser=$BINTRAY_USER -PbintrayApiKey=$BINTRAY_API_KEY
+            elif [ "$CIRCLE_BRANCH" == "integration" ]; then
+              ./gradlew publishMavenS3PublicationToSnapshotRepository -PawsMavenAccessKey=$AWS_MAVEN_ACCESS_KEY -PawsMavenSecretKey=$AWS_MAVEN_SECRET_KEY
+            fi
