@@ -39,7 +39,7 @@ class GitApi implements SourceControlApi {
             args arguments
             standardOutput output
             ignoreExitValue = true
-        }.assertNormalExitValue()
+        }.rethrowFailure()
         return output.toString().trim()
     }
 
