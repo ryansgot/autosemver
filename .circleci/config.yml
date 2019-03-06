@@ -2,7 +2,7 @@ version: 2
 jobs:
   build:
     docker:
-      - image: circleci/android:api-25-alpha
+      - image: circleci/android:api-27
       # environment variables for all commands executed in the primary container
         environment:
           GIT_AUTHOR_NAME: circleci
@@ -37,7 +37,7 @@ jobs:
           key: v1-dependencies-{{ checksum "build.gradle" }}
 
       # publishModules will take effect only when the current branch is configured in the root project's build.gradle
-      - run: ./gradlew clean test bumpVersion
+      - run: ./gradlew clean test bumpVersion --stacktrace
 
       - store_artifacts:
           path: core/build/reports
